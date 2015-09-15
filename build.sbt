@@ -1,6 +1,6 @@
 scalaVersion := "2.11.7"
 
-organization := "com.twitter.finagle"
+organization := "com.github.dmexe"
 
 name := "finagle-consul"
 

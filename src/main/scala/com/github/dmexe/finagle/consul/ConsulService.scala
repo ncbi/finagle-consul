@@ -1,8 +1,7 @@
-package com.twitter.finagle.consul
+package com.github.dmexe.finagle.consul
 
 import java.util.logging.Logger
-
-import com.twitter.finagle.consul.client.KeyService
+import com.github.dmexe.finagle.consul.client.KeyService
 import com.twitter.finagle.httpx.{Request, Response}
 import com.twitter.finagle.{Service => HttpxService}
 import com.twitter.util.Await

@@ -1,1 +1,1 @@
-com.twitter.finagle.consul.ConsulResolver
+com.github.dmexe.finagle.consul.ConsulResolver

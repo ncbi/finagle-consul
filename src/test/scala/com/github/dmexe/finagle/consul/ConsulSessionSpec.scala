@@ -1,4 +1,4 @@
-package com.twitter.finagle.consul
+package com.github.dmexe.finagle.consul
 
 import com.twitter.finagle.Httpx
 import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpecLike}

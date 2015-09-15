@@ -1,8 +1,7 @@
-package com.twitter.finagle.consul.client
+package com.github.dmexe.finagle.consul.client
 
 import java.util.Base64
-
-import com.twitter.finagle.consul.ConsulErrors
+import com.github.dmexe.finagle.consul.ConsulErrors
 import com.twitter.finagle.httpx.{Method, Request => HttpRequest, Response => HttpResponse}
 import com.twitter.finagle.{Service => HttpxService}
 import com.twitter.util.Future

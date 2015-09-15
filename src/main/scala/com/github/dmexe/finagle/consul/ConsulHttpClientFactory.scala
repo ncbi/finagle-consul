@@ -1,4 +1,4 @@
-package com.twitter.finagle.consul
+package com.github.dmexe.finagle.consul
 
 import com.twitter.finagle.httpx.{Request, Response}
 import com.twitter.finagle.{Httpx, Service}

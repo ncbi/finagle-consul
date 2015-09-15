@@ -1,4 +1,4 @@
-package com.twitter.finagle.consul
+package com.github.dmexe.finagle.consul
 
 import com.twitter.util.Duration
 import org.jboss.netty.handler.codec.http.QueryStringDecoder
