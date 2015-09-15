@@ -4,7 +4,7 @@ organization := "com.twitter.finagle"
 
 name := "finagle-consul"
 
-version := "0.1-SNAPSHOT"
+version := "0.0.1"
 
 licenses += ("MIT", url("http://opensource.org/licenses/MIT"))
 
