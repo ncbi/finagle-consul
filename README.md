@@ -23,9 +23,7 @@ you can specify a name as URL, but all "/" will be replaced with "."
 Add the following to your sbt build.sbt file:
 
 ```scala
-resolvers ++= Seq(
-  "dmexe's bintray" at "http://dl.bintray.com/dmexe/maven"
-)
+resolvers += Resolver.jcenterRepo
 
 libraryDependencies ++= Seq(
   "com.github.dmexe" %% "finagle-consul" % "0.0.1"
