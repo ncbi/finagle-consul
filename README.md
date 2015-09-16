@@ -9,9 +9,9 @@ developed by
 extremely scalable tool for service discovery and configuration.
 
 This project is using Consul sessions and K/V storage for announces. Unlike
-services, sessions allow to set up key TTL's, and when application is killed by
-OOM killer or closed unexpectedly, the session and keys, associated with it, are
-automatically removed after TTL is expired.
+Consul services, sessions allow to set up key TTL's, and when application is
+killed by OOM killer or closed unexpectedly, the session and keys, associated
+with it, are automatically removed after TTL is expired.
 
 Service definitions are stored in `/v1/kv/finagle/services/:name/:sessionId`,
 you can specify a name as URL, but all "/" will be replaced with "."
