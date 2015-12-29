@@ -5,7 +5,7 @@ import java.util.logging.{Level, Logger}
 
 import com.github.dmexe.finagle.consul.client.SessionService
 import com.twitter.finagle.Service
-import com.twitter.finagle.httpx.{Request, Response}
+import com.twitter.finagle.http.{Request, Response}
 import com.twitter.util.{Await, NonFatal, Return, Throw, Try}
 
 class ConsulSession(httpClient: Service[Request, Response], opts: ConsulSession.Options) {
