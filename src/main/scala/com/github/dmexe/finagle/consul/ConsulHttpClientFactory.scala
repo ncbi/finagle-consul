@@ -1,7 +1,7 @@
 package com.github.dmexe.finagle.consul
 
-import com.twitter.finagle.httpx.{Request, Response}
-import com.twitter.finagle.{Httpx, Service}
+import com.twitter.finagle.http.{Request, Response}
+import com.twitter.finagle.{Http, Service}
 
 import scala.collection.mutable
 
@@ -14,7 +14,7 @@ object ConsulHttpClientFactory {
   def getClient(hosts: String): Client = {
     synchronized {
       val client = clients.getOrElseUpdate(hosts, {
-        Httpx.newService(hosts)
+        Http.newService(hosts)
       })
       client
     }

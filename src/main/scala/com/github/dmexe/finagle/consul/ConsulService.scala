@@ -2,13 +2,13 @@ package com.github.dmexe.finagle.consul
 
 import java.util.logging.Logger
 import com.github.dmexe.finagle.consul.client.KeyService
-import com.twitter.finagle.httpx.{Request, Response}
-import com.twitter.finagle.{Service => HttpxService}
+import com.twitter.finagle.http.{Request, Response}
+import com.twitter.finagle.{Service => HttpService}
 import com.twitter.util.Await
 
 import scala.collection.mutable
 
-class ConsulService(httpClient: HttpxService[Request, Response]) {
+class ConsulService(httpClient: HttpService[Request, Response]) {
 
   import ConsulService._
 

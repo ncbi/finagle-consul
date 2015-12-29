@@ -1,6 +1,6 @@
 package com.github.dmexe.finagle.consul
 
-import com.twitter.finagle.httpx.Response
+import com.twitter.finagle.http.Response
 
 object ConsulErrors {
   class BadResponseException(msg: String) extends RuntimeException(msg)

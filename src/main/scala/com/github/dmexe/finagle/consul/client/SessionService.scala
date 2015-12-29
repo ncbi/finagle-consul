@@ -1,13 +1,13 @@
 package com.github.dmexe.finagle.consul.client
 
 import com.github.dmexe.finagle.consul.ConsulErrors
-import com.twitter.finagle.httpx.{Method, Request => HttpRequest, Response => HttpResponse}
-import com.twitter.finagle.{Service => HttpxService}
+import com.twitter.finagle.http.{Method, Request => HttpRequest, Response => HttpResponse}
+import com.twitter.finagle.{Service => HttpService}
 import com.twitter.util.Future
 import org.json4s.jackson.JsonMethods._
 import org.json4s.jackson.Serialization
 
-class SessionService(httpClient: HttpxService[HttpRequest, HttpResponse]) {
+class SessionService(httpClient: HttpService[HttpRequest, HttpResponse]) {
   import SessionService._
 
   implicit val format = org.json4s.DefaultFormats
@@ -65,5 +65,5 @@ object SessionService {
   case class CreateResponse(ID: String)
   case class SessionResponse(LockDelay: Int, Checks: Set[String], Node: String, ID: String, CreateIndex: Int, Behavior: String, TTL: String)
 
-  def apply(httpClient: HttpxService[HttpRequest, HttpResponse]) = new SessionService(httpClient)
+  def apply(httpClient: HttpService[HttpRequest, HttpResponse]) = new SessionService(httpClient)
 }

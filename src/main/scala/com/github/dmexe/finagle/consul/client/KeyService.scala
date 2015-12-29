@@ -1,14 +1,14 @@
 package com.github.dmexe.finagle.consul.client
 
-import java.util.Base64
 import com.github.dmexe.finagle.consul.ConsulErrors
-import com.twitter.finagle.httpx.{Method, Request => HttpRequest, Response => HttpResponse}
-import com.twitter.finagle.{Service => HttpxService}
+import com.twitter.finagle.http.{Method, Request => HttpRequest, Response => HttpResponse}
+import com.twitter.finagle.{Service => HttpService}
 import com.twitter.util.Future
+import org.apache.commons.codec.binary.Base64
 import org.json4s.jackson.JsonMethods._
 import org.json4s.jackson.Serialization
 
-class KeyService(httpClient: HttpxService[HttpRequest, HttpResponse]) {
+class KeyService(httpClient: HttpService[HttpRequest, HttpResponse]) {
 
   import KeyService._
 
@@ -156,7 +156,7 @@ class KeyService(httpClient: HttpxService[HttpRequest, HttpResponse]) {
   }
 
   private def decodeStringValue(bytes: String): String = {
-    new String(Base64.getDecoder.decode(bytes))
+    new String(Base64.decodeBase64(bytes))
   }
 
   private def keyName(path: String, recurse: Boolean = false, acquire: Option[String] = None, release: Option[String] = None): String = {
@@ -190,5 +190,5 @@ class KeyService(httpClient: HttpxService[HttpRequest, HttpResponse]) {
 object KeyService {
   case class Response[T](Session: Option[String], CreateIndex: Int, ModifyIndex: Int, LockIndex: Int, Key: String, Flags: Int, Value: T)
 
-  def apply(httpClient: HttpxService[HttpRequest, HttpResponse]) = new KeyService(httpClient)
+  def apply(httpClient: HttpService[HttpRequest, HttpResponse]) = new KeyService(httpClient)
 }
