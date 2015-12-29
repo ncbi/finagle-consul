@@ -1,6 +1,6 @@
 package com.github.dmexe.finagle.consul.client
 
-import com.twitter.finagle.{Httpx, httpx}
+import com.twitter.finagle.{Http, http}
 import com.twitter.util.Await
 import org.scalatest.WordSpec
 import org.json4s.jackson.JsonMethods._
@@ -10,7 +10,7 @@ class KeyServiceSpec extends WordSpec {
   case class Value(name: String)
   case class Session(ID: String)
 
-  val httpClient = Httpx.newService("localhost:8500")
+  val httpClient = Http.newService("localhost:8500")
   val service    = KeyService(httpClient)
 
   "simple create/get/destroy" in {
@@ -61,7 +61,7 @@ class KeyServiceSpec extends WordSpec {
     val lock  = "test/lock0"
     val value = Value("test")
     val body  = s"""{ "LockDelay": "10s", "Name": "test", "Behavior": "delete", "TTL": "10s" }"""
-    val createSession = httpx.Request(httpx.Method.Put, "/v1/session/create")
+    val createSession = http.Request(http.Method.Put, "/v1/session/create")
     createSession.write(body)
 
     val sessionReply0 = Await.result(httpClient(createSession))

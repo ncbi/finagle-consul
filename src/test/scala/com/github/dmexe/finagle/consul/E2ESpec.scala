@@ -1,7 +1,7 @@
 package com.github.dmexe.finagle.consul
 
-import com.twitter.finagle.httpx.{Method, Request, Response, Status}
-import com.twitter.finagle.{ListeningServer, Httpx, Service}
+import com.twitter.finagle.http.{Method, Request, Response, Status}
+import com.twitter.finagle.{ListeningServer, Http, Service}
 import com.twitter.util.{Await, Future}
 import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpecLike}
 
@@ -20,12 +20,12 @@ class E2ESpec extends WordSpecLike with Matchers with BeforeAndAfterAll {
     var client:  Service[Request, Response] = null
 
     try {
-      server0 = Httpx.serveAndAnnounce("consul!localhost:8500!/E2ESpec", service0)
-      server1 = Httpx.serveAndAnnounce("consul!localhost:8500!/E2ESpec", service0)
+      server0 = Http.serveAndAnnounce("consul!localhost:8500!/E2ESpec", service0)
+      server1 = Http.serveAndAnnounce("consul!localhost:8500!/E2ESpec", service0)
 
       Thread.sleep(2000)
 
-      client = Httpx.newService("consul!localhost:8500!/E2ESpec?ttl=1")
+      client = Http.newService("consul!localhost:8500!/E2ESpec?ttl=1")
       val req = Request(Method.Get, "/")
 
       // live: 0,1
@@ -34,7 +34,7 @@ class E2ESpec extends WordSpecLike with Matchers with BeforeAndAfterAll {
       server0.close()
 
       Thread.sleep(2000)
-      server2 = Httpx.serveAndAnnounce("consul!localhost:8500!/E2ESpec", service0)
+      server2 = Http.serveAndAnnounce("consul!localhost:8500!/E2ESpec", service0)
       Thread.sleep(2000)
 
       // live 0,2
@@ -43,7 +43,7 @@ class E2ESpec extends WordSpecLike with Matchers with BeforeAndAfterAll {
       server1.close()
 
       Thread.sleep(2000)
-      server3 = Httpx.serveAndAnnounce("consul!localhost:8500!/E2ESpec", service0)
+      server3 = Http.serveAndAnnounce("consul!localhost:8500!/E2ESpec", service0)
       Thread.sleep(2000)
 
       // live 2,3
