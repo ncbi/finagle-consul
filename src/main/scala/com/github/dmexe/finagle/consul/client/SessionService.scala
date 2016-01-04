@@ -53,7 +53,7 @@ class SessionService(httpClient: HttpService[HttpRequest, HttpResponse]) {
     httpRequest.setContentTypeJson()
     httpClient(httpRequest) flatMap { reply =>
       reply.getStatusCode() match {
-        case 200 => Future.value(Option(parse(reply.contentString).extract[SessionResponse]))
+        case 200 => Future.value(parse(reply.contentString).extract[List[SessionResponse]].headOption)
         case _   => Future.exception(ConsulErrors.badResponse(reply))
       }
     }
@@ -61,7 +61,7 @@ class SessionService(httpClient: HttpService[HttpRequest, HttpResponse]) {
 }
 
 object SessionService {
-  case class CreateRequest(LockDelay: String,  Name: String, Behavior: String, TTL: String)
+  case class CreateRequest(LockDelay: Int,  Name: String, Behavior: String, TTL: String)
   case class CreateResponse(ID: String)
   case class SessionResponse(LockDelay: Int, Checks: Set[String], Node: String, ID: String, CreateIndex: Int, Behavior: String, TTL: String)
 

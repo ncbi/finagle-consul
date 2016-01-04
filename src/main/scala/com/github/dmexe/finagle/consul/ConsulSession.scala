@@ -148,7 +148,7 @@ class ConsulSession(httpClient: Service[Request, Response], opts: ConsulSession.
 
   private[this] def createReq() = {
     val createRequest = SessionService.CreateRequest(
-      LockDelay = s"${opts.lockDelay}s", Name = opts.name, Behavior = "delete", TTL = s"${opts.ttl}s"
+      LockDelay = opts.lockDelay, Name = opts.name, Behavior = "delete", TTL = s"${opts.ttl}s"
     )
     Await.result(client.create(createRequest))
   }

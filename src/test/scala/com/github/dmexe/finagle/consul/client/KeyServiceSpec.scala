@@ -2,10 +2,10 @@ package com.github.dmexe.finagle.consul.client
 
 import com.twitter.finagle.{Http, http}
 import com.twitter.util.Await
-import org.scalatest.WordSpec
+import org.scalatest.{Matchers, WordSpec}
 import org.json4s.jackson.JsonMethods._
 
-class KeyServiceSpec extends WordSpec {
+class KeyServiceSpec extends WordSpec with Matchers {
 
   case class Value(name: String)
   case class Session(ID: String)
@@ -47,8 +47,8 @@ class KeyServiceSpec extends WordSpec {
 
     val allReply = Await.result(service.getJsonSet[Value]("test/key"))
     assert(allReply.size == 3)
-    assert(allReply.map(_.Key)   == Set("test/key/0", "test/key/1/2", "test/key/1"))
-    assert(allReply.map(_.Value.name).toString == "Set(test0, test2, test1)")
+    allReply.map(_.Key) should equal(Set("test/key/0", "test/key/1/2", "test/key/1"))
+    allReply.map(_.Value.name) should equal(Set("test0", "test2", "test1"))
 
     Await.result(service.delete(path0))
     Await.result(service.delete(path1))
@@ -72,7 +72,6 @@ class KeyServiceSpec extends WordSpec {
 
     assert(Await.result(service.acquireJson[Value](lock, value, session0.ID)))
 
-    assert(!Await.result(service.acquireJson[Value](lock, value, session0.ID)))
     assert(!Await.result(service.acquireJson[Value](lock, value, session1.ID)))
 
     assert(Await.result(service.getJson[Value](lock)).head.Session.head == session0.ID)
