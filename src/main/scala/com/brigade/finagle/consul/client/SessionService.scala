@@ -1,6 +1,6 @@
-package com.github.dmexe.finagle.consul.client
+package com.brigade.finagle.consul.client
 
-import com.github.dmexe.finagle.consul.ConsulErrors
+import com.brigade.finagle.consul.ConsulErrors
 import com.twitter.finagle.http.{Method, Request => HttpRequest, Response => HttpResponse}
 import com.twitter.finagle.{Service => HttpService}
 import com.twitter.util.Future

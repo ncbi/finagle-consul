@@ -1,4 +1,4 @@
-package com.github.dmexe.finagle.consul.client
+package com.brigade.finagle.consul.client
 
 import com.twitter.finagle.{Http, http}
 import com.twitter.util.Await

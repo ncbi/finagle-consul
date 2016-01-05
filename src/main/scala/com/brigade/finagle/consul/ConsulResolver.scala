@@ -1,4 +1,4 @@
-package com.github.dmexe.finagle.consul
+package com.brigade.finagle.consul
 
 import java.net.{InetSocketAddress, SocketAddress}
 import java.util.logging.Logger

@@ -9,7 +9,7 @@
     </parent>
 
     <artifactId>finagle-consul</artifactId>
-    <version>0.0.1</version>
+    <version>0.0.2-SNAPSHOT</version>
 
     <properties>
         <scala.version>2.11.7</scala.version>
