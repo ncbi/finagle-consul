@@ -1,7 +1,7 @@
-package com.github.dmexe.finagle.consul
+package com.brigade.finagle.consul
 
 import java.util.logging.Logger
-import com.github.dmexe.finagle.consul.client.KeyService
+import com.brigade.finagle.consul.client.KeyService
 import com.twitter.finagle.http.{Request, Response}
 import com.twitter.finagle.{Service => HttpService}
 import com.twitter.util.Await

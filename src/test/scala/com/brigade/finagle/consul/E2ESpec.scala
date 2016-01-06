@@ -1,4 +1,4 @@
-package com.github.dmexe.finagle.consul
+package com.brigade.finagle.consul
 
 import com.twitter.finagle.http.{Method, Request, Response, Status}
 import com.twitter.finagle.{ListeningServer, Http, Service}

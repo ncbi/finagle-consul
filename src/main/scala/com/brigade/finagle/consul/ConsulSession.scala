@@ -1,9 +1,11 @@
-package com.github.dmexe.finagle.consul
+package com.brigade.finagle.consul
+
+import com.brigade.finagle.consul.client.SessionService.SessionResponse
 
 import java.util.concurrent.{LinkedBlockingQueue, TimeUnit}
 import java.util.logging.{Level, Logger}
 
-import com.github.dmexe.finagle.consul.client.SessionService
+import com.brigade.finagle.consul.client.SessionService
 import com.twitter.finagle.Service
 import com.twitter.finagle.http.{Request, Response}
 import com.twitter.util.{Await, NonFatal, Return, Throw, Try}
@@ -35,7 +37,7 @@ class ConsulSession(httpClient: Service[Request, Response], opts: ConsulSession.
 
   def isOpen = sessionId.isDefined
 
-  def info(): Option[SessionService.SessionResponse] = {
+  def info(): Option[SessionResponse] = {
     sessionId flatMap infoReq
   }
 

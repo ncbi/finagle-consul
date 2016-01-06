@@ -1,8 +1,8 @@
 ## Finagle Consul
 
-Service discovery for Finagle cluster with Consul. This project originaly
+Service discovery for Finagle cluster with Consul. This project was originaly
 developed by
-[kachayev/finagle-consul](https://github.com/kachayev/finagle-consul), Unlike kachayev’s version, where services are used, here we use sessions and k/v for discovery.
+[kachayev/finagle-consul](https://github.com/kachayev/finagle-consul) and [dmexe/finagle-consul](https://github.com/dmexe/finagle-consul)
 
 ### About
 [Consul](https://www.consul.io/) is a distributed, highly available and
@@ -19,16 +19,6 @@ you can specify a name as URL, but all "/" will be replaced with "."
 ### Install
 
 **Warning! This is still BETA.**
-
-Add the following to your sbt build.sbt file:
-
-```scala
-resolvers += Resolver.jcenterRepo
-
-libraryDependencies ++= Seq(
-  "com.github.dmexe" %% "finagle-consul" % "0.0.1"
-)
-```
 
 ### Consul path definition
 
