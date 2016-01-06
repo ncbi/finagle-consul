@@ -1,14 +1,13 @@
 package com.brigade.finagle.consul
 
-import com.brigade.finagle.consul.client.SessionService.SessionResponse
-
-import java.util.concurrent.{LinkedBlockingQueue, TimeUnit}
-import java.util.logging.{Level, Logger}
-
 import com.brigade.finagle.consul.client.SessionService
+import com.brigade.finagle.consul.client.SessionService.SessionResponse
 import com.twitter.finagle.Service
 import com.twitter.finagle.http.{Request, Response}
 import com.twitter.util.{Await, NonFatal, Return, Throw, Try}
+
+import java.util.concurrent.{LinkedBlockingQueue, TimeUnit}
+import java.util.logging.{Level, Logger}
 
 class ConsulSession(httpClient: Service[Request, Response], opts: ConsulSession.Options) {
 

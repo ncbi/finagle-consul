@@ -1,25 +1,26 @@
-package com.brigade.finagle.consul
+package com.brigade.finagle.consul.kv
 
+import com.brigade.finagle.consul.ConsulSession
 import com.twitter.finagle.Http
-import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpecLike}
+import org.scalatest.{WordSpec, BeforeAndAfterAll, Matchers}
 
-class ConsulServiceSpec extends WordSpecLike with Matchers with BeforeAndAfterAll {
+class ConsulKVServiceSpec extends WordSpec with Matchers with BeforeAndAfterAll {
 
   val client  = Http.newService("localhost:8500")
 
   "create/list/destroy" in {
     val session0 = new ConsulSession(client, ConsulSession.Options("spec"))
     val session1 = new ConsulSession(client, ConsulSession.Options("spec"))
-    val service  = new ConsulService(client)
+    val service  = new ConsulKVService(client)
 
     try {
-      var instances = List.empty[ConsulService.Service]
+      var instances = List.empty[ConsulKVService.Service]
 
       session0.open()
       session1.open()
 
-      val newInstance0 = ConsulService.Service(session0.sessionId.get, "my/name", "example.com", 80, Set("one", "two"))
-      val newInstance1 = ConsulService.Service(session1.sessionId.get, "my/name", "example.com", 80, Set("one", "two"))
+      val newInstance0 = ConsulKVService.Service(session0.sessionId.get, "my/name", "example.com", 80, Set("one", "two"))
+      val newInstance1 = ConsulKVService.Service(session1.sessionId.get, "my/name", "example.com", 80, Set("one", "two"))
 
       assert(newInstance0.ID != newInstance1.ID)
 

@@ -1,11 +1,12 @@
-package com.brigade.finagle.consul
-
-import java.util.logging.{Level, Logger}
+package com.brigade.finagle.consul.kv
 
 import com.brigade.finagle.consul.client.KeyService
+import com.brigade.finagle.consul.{ConsulHttpClientFactory, ConsulSession}
 import com.twitter.finagle.Service
 import com.twitter.finagle.http.{Request, Response}
 import com.twitter.util._
+
+import java.util.logging.{Level, Logger}
 
 class ConsulLeaderElection(name: String, httpClient: Service[Request,Response], session: ConsulSession) {
 

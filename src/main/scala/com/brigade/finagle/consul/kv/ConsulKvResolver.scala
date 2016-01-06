@@ -1,21 +1,25 @@
-package com.brigade.finagle.consul
+package com.brigade.finagle.consul.kv
 
-import java.net.{InetSocketAddress, SocketAddress}
-import java.util.logging.Logger
-
+import com.brigade.finagle.consul.ConsulQuery
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.finagle.{Addr, Resolver}
 import com.twitter.util.Var
 
-class ConsulResolver extends Resolver {
-  val scheme = "consul"
+import java.net.{InetSocketAddress, SocketAddress}
+import java.util.logging.Logger
+
+/**
+ * A finagle Resolver to discover services registered with [[ConsulKVAnnouncer]]
+ */
+class ConsulKVResolver extends Resolver {
+  val scheme = "consulKV"
 
   private val log        = Logger.getLogger(getClass.getName)
   private val timer      = DefaultTimer.twitter
   private var digest     = ""
 
   private def addresses(hosts: String, name: String) : Option[Set[SocketAddress]] = {
-    val services  = ConsulService.get(hosts).list(name)
+    val services  = ConsulKVService.get(hosts).list(name)
     val newDigest = services.map(_.ID).sorted.mkString(",")
     if (newDigest != digest) {
       val newAddrs = services.map{ s =>

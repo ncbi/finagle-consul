@@ -1,16 +1,18 @@
-package com.brigade.finagle.consul
+package com.brigade.finagle.consul.kv
 
-import java.util.logging.Logger
+import com.brigade.finagle.consul.ConsulHttpClientFactory
 import com.brigade.finagle.consul.client.KeyService
 import com.twitter.finagle.http.{Request, Response}
 import com.twitter.finagle.{Service => HttpService}
 import com.twitter.util.Await
 
+import java.util.logging.Logger
+
 import scala.collection.mutable
 
-class ConsulService(httpClient: HttpService[Request, Response]) {
+class ConsulKVService(httpClient: HttpService[Request, Response]) {
 
-  import ConsulService._
+  import ConsulKVService._
 
   private val log    = Logger.getLogger(getClass.getName)
   private val client = KeyService(httpClient)
@@ -41,16 +43,16 @@ class ConsulService(httpClient: HttpService[Request, Response]) {
   }
 }
 
-object ConsulService {
+object ConsulKVService {
   case class Service(ID: String, Service: String, Address: String, Port: Int, Tags: Set[String], dc: Option[String] = None)
 
-  private val services: mutable.Map[String, ConsulService] = mutable.Map()
+  private val services: mutable.Map[String, ConsulKVService] = mutable.Map()
 
-  def get(hosts: String): ConsulService = {
+  def get(hosts: String): ConsulKVService = {
     synchronized {
       val service = services.getOrElseUpdate(hosts, {
         val newClient = ConsulHttpClientFactory.getClient(hosts)
-        new ConsulService(newClient)
+        new ConsulKVService(newClient)
       })
       service
     }
