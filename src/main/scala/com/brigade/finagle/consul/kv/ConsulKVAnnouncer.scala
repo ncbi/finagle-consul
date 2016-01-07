@@ -18,7 +18,7 @@ class ConsulKVAnnouncer extends Announcer {
   def announce(ia: InetSocketAddress, hosts: String, q: ConsulQuery): Future[Announcement] = {
     val address  = ia.getAddress.getHostAddress
     val session  = ConsulSession.get(hosts)
-    val service  = new ConsulKVService(ConsulHttpClientFactory.getClient(hosts))
+    val service  = new ConsulKVClient(ConsulHttpClientFactory.getClient(hosts))
     val listener = new SessionListener(service, q.name, address, ia.getPort, q.tags)
 
     session.addListener(listener)
@@ -26,7 +26,7 @@ class ConsulKVAnnouncer extends Announcer {
 
     Future {
       new Announcement {
-        def unannounce() = Future[Unit] {
+        override def unannounce() = Future[Unit] {
           session.delListener(listener)
           session.stop()
         }
@@ -34,7 +34,7 @@ class ConsulKVAnnouncer extends Announcer {
     }
   }
 
-  def announce(ia: InetSocketAddress, addr: String): Future[Announcement] = {
+  override def announce(ia: InetSocketAddress, addr: String): Future[Announcement] = {
     addr.split("!") match {
       case Array(hosts, query) =>
         ConsulQuery.decodeString(query) match {
@@ -51,11 +51,11 @@ class ConsulKVAnnouncer extends Announcer {
 }
 
 object ConsulKVAnnouncer {
-  class SessionListener(service: ConsulKVService, name: String, address: String, port: Int, tags: Set[String])
+  class SessionListener(service: ConsulKVClient, name: String, address: String, port: Int, tags: Set[String])
     extends ConsulSession.Listener {
 
     def start(session: String): Unit = {
-      val newSrv = ConsulKVService.Service(session, name, address, port, tags)
+      val newSrv = ConsulKVClient.Service(session, name, address, port, tags)
       service.create(newSrv)
     }
 

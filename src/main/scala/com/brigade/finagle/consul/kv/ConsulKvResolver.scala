@@ -19,7 +19,7 @@ class ConsulKVResolver extends Resolver {
   private var digest     = ""
 
   private def addresses(hosts: String, name: String) : Option[Set[SocketAddress]] = {
-    val services  = ConsulKVService.get(hosts).list(name)
+    val services  = ConsulKVClient.get(hosts).list(name)
     val newDigest = services.map(_.ID).sorted.mkString(",")
     if (newDigest != digest) {
       val newAddrs = services.map{ s =>
@@ -47,7 +47,7 @@ class ConsulKVResolver extends Resolver {
       }
     }
 
-  def bind(arg: String): Var[Addr] = arg.split("!") match {
+  override def bind(arg: String): Var[Addr] = arg.split("!") match {
     case Array(hosts, query) =>
       ConsulQuery.decodeString(query) match {
         case Some(q) => addrOf(hosts, q)

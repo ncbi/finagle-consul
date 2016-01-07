@@ -10,9 +10,9 @@ import java.util.logging.Logger
 
 import scala.collection.mutable
 
-class ConsulKVService(httpClient: HttpService[Request, Response]) {
+class ConsulKVClient(httpClient: HttpService[Request, Response]) {
 
-  import ConsulKVService._
+  import ConsulKVClient._
 
   private val log    = Logger.getLogger(getClass.getName)
   private val client = KeyService(httpClient)
@@ -43,16 +43,16 @@ class ConsulKVService(httpClient: HttpService[Request, Response]) {
   }
 }
 
-object ConsulKVService {
+object ConsulKVClient {
   case class Service(ID: String, Service: String, Address: String, Port: Int, Tags: Set[String], dc: Option[String] = None)
 
-  private val services: mutable.Map[String, ConsulKVService] = mutable.Map()
+  private val services: mutable.Map[String, ConsulKVClient] = mutable.Map()
 
-  def get(hosts: String): ConsulKVService = {
+  def get(hosts: String): ConsulKVClient = {
     synchronized {
       val service = services.getOrElseUpdate(hosts, {
         val newClient = ConsulHttpClientFactory.getClient(hosts)
-        new ConsulKVService(newClient)
+        new ConsulKVClient(newClient)
       })
       service
     }

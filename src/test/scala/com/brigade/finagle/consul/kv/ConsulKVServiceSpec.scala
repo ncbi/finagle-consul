@@ -11,16 +11,16 @@ class ConsulKVServiceSpec extends WordSpec with Matchers with BeforeAndAfterAll 
   "create/list/destroy" in {
     val session0 = new ConsulSession(client, ConsulSession.Options("spec"))
     val session1 = new ConsulSession(client, ConsulSession.Options("spec"))
-    val service  = new ConsulKVService(client)
+    val service  = new ConsulKVClient(client)
 
     try {
-      var instances = List.empty[ConsulKVService.Service]
+      var instances = List.empty[ConsulKVClient.Service]
 
       session0.open()
       session1.open()
 
-      val newInstance0 = ConsulKVService.Service(session0.sessionId.get, "my/name", "example.com", 80, Set("one", "two"))
-      val newInstance1 = ConsulKVService.Service(session1.sessionId.get, "my/name", "example.com", 80, Set("one", "two"))
+      val newInstance0 = ConsulKVClient.Service(session0.sessionId.get, "my/name", "example.com", 80, Set("one", "two"))
+      val newInstance1 = ConsulKVClient.Service(session1.sessionId.get, "my/name", "example.com", 80, Set("one", "two"))
 
       assert(newInstance0.ID != newInstance1.ID)
 
