@@ -55,7 +55,7 @@ object ConsulKVAnnouncer {
     extends ConsulSession.Listener {
 
     def start(session: String): Unit = {
-      val newSrv = ConsulKVClient.Service(session, name, address, port, tags)
+      val newSrv = ConsulKVClient.ServiceJson(session, name, address, port, tags)
       service.create(newSrv)
     }
 

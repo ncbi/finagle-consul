@@ -40,7 +40,7 @@ class ConsulAgentClient(httpClient: Service[Request, Response]) {
     val checkId = s"service:$serviceId"
 
     val check = TtlCheck(TTL = formatTtl(q.ttl))
-    val serviceDefJson = ConsulService(
+    val serviceDefJson = ConsulServiceJson(
       ID = Some(serviceId),
       Name = q.name,
       Tags = q.tags,

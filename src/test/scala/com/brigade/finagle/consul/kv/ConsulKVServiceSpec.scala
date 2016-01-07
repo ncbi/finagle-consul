@@ -14,13 +14,13 @@ class ConsulKVServiceSpec extends WordSpec with Matchers with BeforeAndAfterAll 
     val service  = new ConsulKVClient(client)
 
     try {
-      var instances = List.empty[ConsulKVClient.Service]
+      var instances = List.empty[ConsulKVClient.ServiceJson]
 
       session0.open()
       session1.open()
 
-      val newInstance0 = ConsulKVClient.Service(session0.sessionId.get, "my/name", "example.com", 80, Set("one", "two"))
-      val newInstance1 = ConsulKVClient.Service(session1.sessionId.get, "my/name", "example.com", 80, Set("one", "two"))
+      val newInstance0 = ConsulKVClient.ServiceJson(session0.sessionId.get, "my/name", "example.com", 80, Set("one", "two"))
+      val newInstance1 = ConsulKVClient.ServiceJson(session1.sessionId.get, "my/name", "example.com", 80, Set("one", "two"))
 
       assert(newInstance0.ID != newInstance1.ID)
 

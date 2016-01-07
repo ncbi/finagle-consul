@@ -35,6 +35,9 @@ class ConsulAgentCatalogAnnouncer extends Announcer {
     registrationFuture
       .map { regResponse =>
         log.debug(s"Successfully registered consul service: $regResponse")
+
+        consulClient.healthCheck(regResponse.checkId) // initial healthcheck
+
         // start the healthcheck and always make it less than the TTL
         val freq = q.ttl / 2
         require(freq.inSeconds >= 1, "Service TTL must be above two seconds!")

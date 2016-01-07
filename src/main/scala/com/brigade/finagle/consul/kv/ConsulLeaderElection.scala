@@ -111,5 +111,4 @@ object ConsulLeaderElection {
     leader.start()
     leader
   }
-
 }
