@@ -10,7 +10,6 @@ import com.twitter.util.{Await, Future}
  */
 object EchoServer {
   def main(args: Array[String]): Unit = {
-
     val serverPort = args.headOption.getOrElse("8080")
     val service = new Service[Request, Response] {
       override def apply(request: Request): Future[Response] = {

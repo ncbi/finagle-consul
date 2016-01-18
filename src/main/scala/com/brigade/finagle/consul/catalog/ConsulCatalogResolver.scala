@@ -32,32 +32,26 @@ class ConsulCatalogResolver extends Resolver {
     q.tags.toList.map { "tag" -> _ }
   }
 
-  private def catalogPath(q: ConsulQuery) = {
-    val path = s"/v1/catalog/service/${q.name}"
-    val params = List(datacenterParam(q), tagParams(q)).flatten
+  private def mkPath(q: ConsulQuery) = {
+    val path = s"/v1/health/service/${q.name}"
+    val params = List(datacenterParam(q), tagParams(q)).flatten :+ ("passing", "true")
     val query = Request.queryString(params: _*)
     s"$path$query"
   }
 
-  private def jsonToAddress(location: ServiceLocationJson): SocketAddress = {
-    val address =
-      if (location.ServiceAddress.isEmpty) {
-        location.Address
-      } else {
-        location.ServiceAddress
-      }
-
-    new InetSocketAddress(address, location.ServicePort)
+  private def jsonToAddresses(json: JValue): Set[SocketAddress] = {
+    json
+      .extract[Set[HealthJson]]
+      .map { ex => new InetSocketAddress(ex.Service.Address, ex.Service.Port)}
   }
 
   private def addresses(hosts: String, q: ConsulQuery) : Set[SocketAddress] = {
     val client = ConsulHttpClientFactory.getClient(hosts)
-    val path = catalogPath(q)
+    val path = mkPath(q)
     val req = Request(Method.Get, path)
 
     val f = client(req).map { resp =>
-      val as = parse(resp.getContentString()).extract[Set[ServiceLocationJson]].map(jsonToAddress)
-
+      val as = jsonToAddresses(parse(resp.getContentString()))
       log.debug(s"Consul catalog lookup at hosts:$hosts path:$path addresses: $as")
       as
     }
@@ -92,13 +86,16 @@ class ConsulCatalogResolver extends Resolver {
 }
 
 object ConsulCatalogResolver {
-  case class ServiceLocationJson(
-    Node: String,
+  // These case classes are used to match the "Service" objects in the docs below
+  // The consul json API is not consistent, so we can't just reuse other "Service" case classes:
+  // https://www.consul.io/docs/agent/http/health.html#health_service
+  case class HealthJson(Service: ServiceHealthJson)
+
+  case class ServiceHealthJson(
+    ID: Option[String],
+    Service: String,
     Address: String,
-    ServiceID: String,
-    ServiceName: String,
-    ServiceTags: List[String],
-    ServiceAddress: String,
-    ServicePort: Int
+    Tags: Option[Seq[String]],
+    Port: Int
   )
 }
