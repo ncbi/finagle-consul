@@ -1,5 +1,6 @@
-package com.brigade.finagle.consul
+package com.brigade.finagle.consul.kv
 
+import com.brigade.finagle.consul.{ConsulHttpClientFactory, ConsulSession}
 import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpecLike}
 
 class ConsulLeaderElectionSpec extends WordSpecLike with Matchers with BeforeAndAfterAll {

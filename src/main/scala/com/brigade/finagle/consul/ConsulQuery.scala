@@ -26,5 +26,4 @@ object ConsulQuery {
     val dc     = params.get("dc").map(_.get(0))
     Some(ConsulQuery(name, ttl, tags, dc))
   }
-
 }

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.brigade</groupId>
+    <artifactId>finagle-consul-demo</artifactId>
+    <version>0.0.0-SNAPSHOT</version>
+
+    <properties>
+        <scala.version>2.11.7</scala.version>
+        <scala.base.version>2.11</scala.base.version>
+        <finagle.version>6.31.0</finagle.version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.brigade</groupId>
+            <artifactId>finagle-consul</artifactId>
+            <version>0.0.2-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.scala-lang</groupId>
+            <artifactId>scala-library</artifactId>
+            <version>${scala.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.twitter</groupId>
+            <artifactId>finagle-core_${scala.base.version}</artifactId>
+            <version>${finagle.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.twitter</groupId>
+            <artifactId>finagle-http_${scala.base.version}</artifactId>
+            <version>${finagle.version}</version>
+        </dependency>
+    </dependencies>
+
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>net.alchim31.maven</groupId>
+                <artifactId>scala-maven-plugin</artifactId>
+                <version>3.2.0</version>
+                <configuration>
+                    <scalaCompatVersion>${scala.base.version}</scalaCompatVersion>
+                    <recompileMode>incremental</recompileMode>
+                    <!--Run zinc as a deamon for even faster compilation-->
+                    <!--http://davidb.github.io/scala-maven-plugin/example_incremental.html-->
+                    <useZincServer>true</useZincServer>
+                    <args>
+                        <arg>-feature</arg>
+                        <arg>-deprecation</arg>
+                        <arg>-unchecked</arg>
+                    </args>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>compile</goal>
+                            <goal>testCompile</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

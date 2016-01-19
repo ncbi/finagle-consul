@@ -1,27 +1,29 @@
-package com.brigade.finagle.consul
+package com.brigade.finagle.consul.kv
 
-import java.util.logging.Logger
+import com.brigade.finagle.consul.ConsulHttpClientFactory
 import com.brigade.finagle.consul.client.KeyService
 import com.twitter.finagle.http.{Request, Response}
 import com.twitter.finagle.{Service => HttpService}
 import com.twitter.util.Await
 
+import java.util.logging.Logger
+
 import scala.collection.mutable
 
-class ConsulService(httpClient: HttpService[Request, Response]) {
+class ConsulKVClient(httpClient: HttpService[Request, Response]) {
 
-  import ConsulService._
+  import ConsulKVClient._
 
   private val log    = Logger.getLogger(getClass.getName)
   private val client = KeyService(httpClient)
 
-  def list(name: String): List[Service] = {
-    val reply = Await.result(client.getJsonSet[Service](lockName(name)))
+  def list(name: String): List[ServiceJson] = {
+    val reply = Await.result(client.getJsonSet[ServiceJson](lockName(name)))
     reply.map(_.Value).toList
   }
 
-  private[consul] def create(service: Service): Unit = {
-    val reply = client.acquireJson[Service](lockName(service.ID, service.Service), service, service.ID)
+  private[consul] def create(service: ServiceJson): Unit = {
+    val reply = client.acquireJson[ServiceJson](lockName(service.ID, service.Service), service, service.ID)
     Await.result(reply)
     log.info(s"Consul service registered name=${service.Service} session=${service.ID} addr=${service.Address}:${service.Port}")
   }
@@ -41,16 +43,24 @@ class ConsulService(httpClient: HttpService[Request, Response]) {
   }
 }
 
-object ConsulService {
-  case class Service(ID: String, Service: String, Address: String, Port: Int, Tags: Set[String], dc: Option[String] = None)
+object ConsulKVClient {
 
-  private val services: mutable.Map[String, ConsulService] = mutable.Map()
+  case class ServiceJson(
+    ID: String,
+    Service: String,
+    Address: String,
+    Port: Int,
+    Tags: Set[String],
+    dc: Option[String] = None
+  )
 
-  def get(hosts: String): ConsulService = {
+  private val services: mutable.Map[String, ConsulKVClient] = mutable.Map()
+
+  def get(hosts: String): ConsulKVClient = {
     synchronized {
       val service = services.getOrElseUpdate(hosts, {
         val newClient = ConsulHttpClientFactory.getClient(hosts)
-        new ConsulService(newClient)
+        new ConsulKVClient(newClient)
       })
       service
     }

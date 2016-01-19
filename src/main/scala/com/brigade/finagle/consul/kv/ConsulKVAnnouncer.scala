@@ -1,20 +1,24 @@
-package com.brigade.finagle.consul
+package com.brigade.finagle.consul.kv
 
-import java.net.InetSocketAddress
-
+import com.brigade.finagle.consul.{ConsulHttpClientFactory, ConsulQuery, ConsulSession}
 import com.twitter.finagle.{Announcement, Announcer}
 import com.twitter.util.Future
 
-class ConsulAnnouncer extends Announcer {
+import java.net.InetSocketAddress
 
-  import ConsulAnnouncer._
+/**
+ * A finagle Announcer that uses Consul's KV and session functionality
+ */
+class ConsulKVAnnouncer extends Announcer {
 
-  val scheme = "consul"
+  import ConsulKVAnnouncer._
+
+  val scheme = "consulKV"
 
   def announce(ia: InetSocketAddress, hosts: String, q: ConsulQuery): Future[Announcement] = {
     val address  = ia.getAddress.getHostAddress
     val session  = ConsulSession.get(hosts)
-    val service  = new ConsulService(ConsulHttpClientFactory.getClient(hosts))
+    val service  = new ConsulKVClient(ConsulHttpClientFactory.getClient(hosts))
     val listener = new SessionListener(service, q.name, address, ia.getPort, q.tags)
 
     session.addListener(listener)
@@ -22,7 +26,7 @@ class ConsulAnnouncer extends Announcer {
 
     Future {
       new Announcement {
-        def unannounce() = Future[Unit] {
+        override def unannounce() = Future[Unit] {
           session.delListener(listener)
           session.stop()
         }
@@ -30,7 +34,7 @@ class ConsulAnnouncer extends Announcer {
     }
   }
 
-  def announce(ia: InetSocketAddress, addr: String): Future[Announcement] = {
+  override def announce(ia: InetSocketAddress, addr: String): Future[Announcement] = {
     addr.split("!") match {
       case Array(hosts, query) =>
         ConsulQuery.decodeString(query) match {
@@ -46,12 +50,12 @@ class ConsulAnnouncer extends Announcer {
   }
 }
 
-object ConsulAnnouncer {
-  class SessionListener(service: ConsulService, name: String, address: String, port: Int, tags: Set[String])
+object ConsulKVAnnouncer {
+  class SessionListener(service: ConsulKVClient, name: String, address: String, port: Int, tags: Set[String])
     extends ConsulSession.Listener {
 
     def start(session: String): Unit = {
-      val newSrv = ConsulService.Service(session, name, address, port, tags)
+      val newSrv = ConsulKVClient.ServiceJson(session, name, address, port, tags)
       service.create(newSrv)
     }
 
