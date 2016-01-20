@@ -1,6 +1,6 @@
 ## Finagle Consul
 
-Service discovery for Finagle cluster with Consul. This project was originaly
+Service discovery for Finagle cluster with Consul. This project was originally
 developed by
 [kachayev/finagle-consul](https://github.com/kachayev/finagle-consul) and [dmexe/finagle-consul](https://github.com/dmexe/finagle-consul)
 
@@ -10,7 +10,7 @@ extremely scalable tool for service discovery and configuration.
 
 This project provides two resolution/announcement strategies: one using
 Consul sessions and K/V, the other using Consul's native service registration
-mechanism (refered to as the "catalog" strategy here).
+mechanism (referred to as the "catalog" strategy here).
 
 #### Catalog strategy
 
@@ -36,15 +36,15 @@ val client = Http.newService("consul!127.0.0.1:8500!/RandomNumber")
 ```
 
 Pros:
-* Integrates cleanely with native Consul Services
+* Integrates cleanly with native Consul Services
 
 Cons:
 * Requires a Consul Agent for server announcements
-* Requires clean up of dead services in enviornments where server addresses are
+* Requires clean up of dead services in environments where server addresses are
 ephemeral, like Mesos
 
 The catalog strategy uses Consul's built-in service discovery APIs. The main
-advantage of this is that it makes it easy to run Finalge services alongside
+advantage of this is that it makes it easy to run Finagle services alongside
 non-finagle services. You can, for example, discover a Rails web service and
 MySQL database using this resolver.
 
@@ -54,7 +54,7 @@ unclean shutdown, e.g. OOM errors or `kill -9`. They will instead only fail
 their health check and be put in a critical state. Though the resolver will
 filter these out, the Consul catalog will get polluted with dead nodes and will
 require clean up if running in an environment like Mesos.
-This is an issue with [Consul iteself](https://github.com/hashicorp/consul/issues/679)
+This is an issue with [Consul itself](https://github.com/hashicorp/consul/issues/679)
 that can be mitigated with a cron job.
 
 
@@ -89,7 +89,7 @@ Unlike the catalog, Consul services and sessions support TTLs for keys, so, when
 an application killed by OOM killer or closed unexpectedly, the session and
 keys associated with it are automatically removed after the TTL expires.
 
-The major drawback of this approach is that non-Finalge services will not be
+The major drawback of this approach is that non-Finagle services will not be
 able to discover or be discovered by this mechanism without custom integration.
 
 Service definitions are stored in `/v1/kv/finagle/services/:name/:sessionId`,
