@@ -28,6 +28,7 @@ class CatalogE2ESpec extends WordSpecLike with Matchers with BeforeAndAfterAll {
 
         client = Http.newService("consul!localhost:8500!/E2ESpec?ttl=1")
         val req = Request(Method.Get, "/")
+        req.host = "localhost"
 
         // live: 0,1
         Await.result(client(req)).status should be(success)

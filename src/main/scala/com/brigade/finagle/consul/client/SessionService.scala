@@ -14,6 +14,7 @@ class SessionService(httpClient: HttpService[HttpRequest, HttpResponse]) {
 
   def create(createRequest: CreateRequest): Future[CreateResponse] = {
     val httpRequest = HttpRequest(Method.Put, "/v1/session/create")
+    httpRequest.host = "localhost"
     httpRequest.setContentTypeJson()
     val httpBody: String = Serialization.write(createRequest)
     httpRequest.write(httpBody)
@@ -27,6 +28,7 @@ class SessionService(httpClient: HttpService[HttpRequest, HttpResponse]) {
 
   def destroy(session: String): Future[Unit] = {
     val httpRequest = HttpRequest(Method.Put, s"/v1/session/destroy/$session")
+    httpRequest.host = "localhost"
     httpRequest.setContentTypeJson()
     httpClient(httpRequest) flatMap { reply =>
       reply.getStatusCode() match {
@@ -38,6 +40,7 @@ class SessionService(httpClient: HttpService[HttpRequest, HttpResponse]) {
 
   def renew(session: String): Future[Option[SessionResponse]] = {
     val httpRequest = HttpRequest(Method.Put, s"/v1/session/renew/$session")
+    httpRequest.host = "localhost"
     httpRequest.setContentTypeJson()
     httpClient(httpRequest) flatMap { reply =>
       reply.getStatusCode() match {
@@ -50,6 +53,7 @@ class SessionService(httpClient: HttpService[HttpRequest, HttpResponse]) {
 
   def info(session: String): Future[Option[SessionResponse]] = {
     val httpRequest = HttpRequest(Method.Get, s"/v1/session/info/$session")
+    httpRequest.host = "localhost"
     httpRequest.setContentTypeJson()
     httpClient(httpRequest) flatMap { reply =>
       reply.getStatusCode() match {

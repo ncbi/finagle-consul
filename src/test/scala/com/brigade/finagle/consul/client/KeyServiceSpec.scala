@@ -62,6 +62,7 @@ class KeyServiceSpec extends WordSpec with Matchers {
     val value = Value("test")
     val body  = s"""{ "LockDelay": "10s", "Name": "test", "Behavior": "delete", "TTL": "10s" }"""
     val createSession = http.Request(http.Method.Put, "/v1/session/create")
+    createSession.host = "localhost"
     createSession.write(body)
 
     val sessionReply0 = Await.result(httpClient(createSession))

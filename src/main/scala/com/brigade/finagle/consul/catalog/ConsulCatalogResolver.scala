@@ -42,17 +42,18 @@ class ConsulCatalogResolver extends Resolver {
   private def jsonToAddresses(json: JValue): Set[SocketAddress] = {
     json
       .extract[Set[HealthJson]]
-      .map { ex => new InetSocketAddress(ex.Service.Address, ex.Service.Port)}
+      .map { ex => new InetSocketAddress(Option(ex.Service.Address).filterNot(_.isEmpty).getOrElse(ex.Node.Address), ex.Service.Port)}
   }
 
   private def addresses(hosts: String, q: ConsulQuery) : Set[SocketAddress] = {
     val client = ConsulHttpClientFactory.getClient(hosts)
     val path = mkPath(q)
     val req = Request(Method.Get, path)
+    req.host = "localhost"
 
     val f = client(req).map { resp =>
       val as = jsonToAddresses(parse(resp.getContentString()))
-      log.debug(s"Consul catalog lookup at hosts:$hosts path:$path addresses: $as")
+      println(s"Consul catalog lookup at hosts:$hosts path:$path addresses: $as")
       as
     }
 
@@ -89,7 +90,7 @@ object ConsulCatalogResolver {
   // These case classes are used to match the "Service" objects in the docs below
   // The consul json API is not consistent, so we can't just reuse other "Service" case classes:
   // https://www.consul.io/docs/agent/http/health.html#health_service
-  case class HealthJson(Service: ServiceHealthJson)
+  case class HealthJson(Node: NodeHealthJson, Service: ServiceHealthJson)
 
   case class ServiceHealthJson(
     ID: Option[String],
@@ -97,5 +98,9 @@ object ConsulCatalogResolver {
     Address: String,
     Tags: Option[Seq[String]],
     Port: Int
+  )
+
+  case class NodeHealthJson(
+    Address: String
   )
 }

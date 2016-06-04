@@ -17,6 +17,7 @@ class KeyService(httpClient: HttpService[HttpRequest, HttpResponse]) {
 
   def get(path: String): Future[Option[Response[String]]] = {
     val httpRequest = HttpRequest(Method.Get, keyName(path))
+    httpRequest.host = "localhost"
     httpRequest.setContentTypeJson()
     httpClient(httpRequest) flatMap { httpResponse =>
       httpResponse.getStatusCode() match {
@@ -33,6 +34,7 @@ class KeyService(httpClient: HttpService[HttpRequest, HttpResponse]) {
 
   def getJson[T](path: String)(implicit m: Manifest[T]): Future[Option[Response[T]]] = {
     val httpRequest = HttpRequest(Method.Get, keyName(path))
+    httpRequest.host = "localhost"
     httpRequest.setContentTypeJson()
     httpClient(httpRequest) flatMap { httpResponse =>
       httpResponse.getStatusCode() match {
@@ -49,6 +51,7 @@ class KeyService(httpClient: HttpService[HttpRequest, HttpResponse]) {
 
   def getJsonSet[T](path: String)(implicit m: Manifest[T]): Future[Set[Response[T]]] = {
     val httpRequest = HttpRequest(Method.Get, keyName(path, recurse = true))
+    httpRequest.host = "localhost"
     httpRequest.setContentTypeJson()
     httpClient(httpRequest) flatMap { httpResponse =>
       httpResponse.getStatusCode() match {
@@ -65,6 +68,7 @@ class KeyService(httpClient: HttpService[HttpRequest, HttpResponse]) {
 
   def putJson[A <: AnyRef](path: String, body: A)(implicit ma: Manifest[A]): Future[Option[Response[A]]] = {
     val httpRequest = HttpRequest(Method.Put, keyName(path))
+    httpRequest.host = "localhost"
     httpRequest.setContentTypeJson()
     val httpBody: String = Serialization.write[A](body)
     httpRequest.write(httpBody)
@@ -78,6 +82,7 @@ class KeyService(httpClient: HttpService[HttpRequest, HttpResponse]) {
 
   def acquire(path: String, session: String): Future[Boolean] = {
     val httpRequest = HttpRequest(Method.Put, keyName(path, acquire = Some(session)))
+    httpRequest.host = "localhost"
     httpRequest.setContentTypeJson()
     httpClient(httpRequest) flatMap { reply =>
       reply.getStatusCode() match {
@@ -89,6 +94,7 @@ class KeyService(httpClient: HttpService[HttpRequest, HttpResponse]) {
 
   def release(path: String, session: String): Future[Boolean] = {
     val httpRequest = HttpRequest(Method.Put, keyName(path, release = Some(session)))
+    httpRequest.host = "localhost"
     httpRequest.setContentTypeJson()
     httpClient(httpRequest) flatMap { reply =>
       reply.getStatusCode() match {
@@ -100,6 +106,7 @@ class KeyService(httpClient: HttpService[HttpRequest, HttpResponse]) {
 
   def acquireJson[A <: AnyRef](path: String, body: A, session: String): Future[Boolean] = {
     val httpRequest = HttpRequest(Method.Put, keyName(path, acquire = Some(session)))
+    httpRequest.host = "localhost"
     httpRequest.setContentTypeJson()
     val httpBody: String = Serialization.write[A](body)
     httpRequest.write(httpBody)
@@ -113,6 +120,7 @@ class KeyService(httpClient: HttpService[HttpRequest, HttpResponse]) {
 
   def releaseJson[A <: AnyRef](path: String, body: A, session: String): Future[Boolean] = {
     val httpRequest = HttpRequest(Method.Put, keyName(path, release = Some(session)))
+    httpRequest.host = "localhost"
     httpRequest.setContentTypeJson()
     val httpBody: String = Serialization.write[A](body)
     httpRequest.write(httpBody)
@@ -126,6 +134,7 @@ class KeyService(httpClient: HttpService[HttpRequest, HttpResponse]) {
 
   def delete(path: String): Future[Unit] = {
     val httpRequest = HttpRequest(Method.Delete, keyName(path))
+    httpRequest.host = "localhost"
     httpRequest.setContentTypeJson()
     httpClient(httpRequest) flatMap { reply =>
       reply.getStatusCode() match {

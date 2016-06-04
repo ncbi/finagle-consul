@@ -50,6 +50,7 @@ class ConsulAgentClient(httpClient: Service[Request, Response]) {
     )
 
     val request = Request(Method.Put, registerPath)
+    request.host = "localhost"
     request.setContentTypeJson()
     request.setContentString(Serialization.write(serviceDefJson))
 
@@ -69,6 +70,7 @@ class ConsulAgentClient(httpClient: Service[Request, Response]) {
   // TODO: DRY these up
   def deregisterService(serviceId: String): Future[Unit] = {
     val request = Request(Method.Put, deregisterPath(serviceId))
+    request.host = "localhost"
     httpClient(request).map { response =>
       val status = response.getStatusCode()
       if (status != 200) {
@@ -84,7 +86,7 @@ class ConsulAgentClient(httpClient: Service[Request, Response]) {
   def healthCheck(checkId: String): Future[Unit] = {
     // https://consul.io/docs/agent/http/agent.html#agent_check_pass
     val request = Request(Method.Get, healthCheckPath(checkId))
-
+    request.host = "localhost"
       httpClient(request).map { response =>
         val status = response.getStatusCode()
         if (status != 200) {
