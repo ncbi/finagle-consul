@@ -53,7 +53,7 @@ class ConsulCatalogResolver extends Resolver {
 
     val f = client(req).map { resp =>
       val as = jsonToAddresses(parse(resp.getContentString()))
-      println(s"Consul catalog lookup at hosts:$hosts path:$path addresses: $as")
+      log.debug(s"Consul catalog lookup at hosts:$hosts path:$path addresses: $as")
       as
     }
 
@@ -74,7 +74,7 @@ class ConsulCatalogResolver extends Resolver {
   override def bind(arg: String): Var[Addr] = {
     arg.split("!") match {
       case Array(hosts, query) =>
-        ConsulQuery.decodeString(query) match {
+        ConsulQuery.decodeString(query.head + query.tail.split("/", 2).head) match {
           case Some(q) => addrOf(hosts, q)
           case None =>
             throw new IllegalArgumentException(s"Invalid address '$arg'")
