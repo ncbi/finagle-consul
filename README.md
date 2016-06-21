@@ -96,14 +96,29 @@ Service definitions are stored in `/v1/kv/finagle/services/:name/:sessionId`,
 you can specify a name as URL, but all "/" will be replaced with "."
 
 
-### Install
+### Example
 
-**Warning! This is still BETA.**
+#### Server
 
-### TODO
+```
+val server = Http.server.serveAndAnnounce("consul!localhost:8500!/EchoServer?ttl=5", s":$serverPort", service)
 
-- [X] Discovery for native Consul services
-- [X] Support tags and datacenters
-- [ ] Leader election top of Consul API
-- [ ] Handle Consul API timeouts
+// Ensure clean de-registration 
+sys.addShutdownHook {
+  Await.result(server.close())
+}
+Await.ready(server)
+```
 
+#### Client
+
+```
+val client = Http.client.newService("consul!localhost:8500!/EchoServer?ttl=2")
+
+```
+
+#### D-Tab
+
+```
+Dentry.read("/account=>/$/com.brigade.finagle.consul.serverset/consul/consul.service.aws-prod.consul:80/account-version-2-2-build-73")))
+```
