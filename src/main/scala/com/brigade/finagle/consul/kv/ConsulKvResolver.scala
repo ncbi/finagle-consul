@@ -2,7 +2,7 @@ package com.brigade.finagle.consul.kv
 
 import com.brigade.finagle.consul.ConsulQuery
 import com.twitter.finagle.util.DefaultTimer
-import com.twitter.finagle.{Addr, Resolver}
+import com.twitter.finagle.{Address, Addr, Resolver}
 import com.twitter.util.Var
 
 import java.net.{InetSocketAddress, SocketAddress}
@@ -18,12 +18,12 @@ class ConsulKVResolver extends Resolver {
   private val timer      = DefaultTimer.twitter
   private var digest     = ""
 
-  private def addresses(hosts: String, name: String) : Option[Set[SocketAddress]] = {
+  private def addresses(hosts: String, name: String) : Option[Set[Address]] = {
     val services  = ConsulKVClient.get(hosts).list(name)
     val newDigest = services.map(_.ID).sorted.mkString(",")
     if (newDigest != digest) {
       val newAddrs = services.map{ s =>
-        new InetSocketAddress(s.Address, s.Port).asInstanceOf[SocketAddress]
+        Address(new InetSocketAddress(s.Address, s.Port))
       }.toSet
       log.info(s"Consul resolver addresses=$newAddrs")
       digest = newDigest
