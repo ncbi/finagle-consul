@@ -3,7 +3,7 @@ package com.brigade.finagle.consul.catalog
 import com.brigade.finagle.consul.{ConsulHttpClientFactory, ConsulQuery}
 import com.twitter.finagle.http.{Method, RequestBuilder, Request}
 import com.twitter.finagle.util.DefaultTimer
-import com.twitter.finagle.{Addr, Resolver}
+import com.twitter.finagle.{Address, Addr, Resolver}
 import com.twitter.logging.Logger
 import com.twitter.util.{Await, Var}
 import org.json4s._
@@ -39,13 +39,13 @@ class ConsulCatalogResolver extends Resolver {
     s"$path$query"
   }
 
-  private def jsonToAddresses(json: JValue): Set[SocketAddress] = {
+  private def jsonToAddresses(json: JValue): Set[InetSocketAddress] = {
     json
       .extract[Set[HealthJson]]
       .map { ex => new InetSocketAddress(Option(ex.Service.Address).filterNot(_.isEmpty).getOrElse(ex.Node.Address), ex.Service.Port)}
   }
 
-  private def addresses(hosts: String, q: ConsulQuery) : Set[SocketAddress] = {
+  private def addresses(hosts: String, q: ConsulQuery) : Set[Address] = {
     val client = ConsulHttpClientFactory.getClient(hosts)
     val path = mkPath(q)
     val req = Request(Method.Get, path)
@@ -54,7 +54,7 @@ class ConsulCatalogResolver extends Resolver {
     val f = client(req).map { resp =>
       val as = jsonToAddresses(parse(resp.getContentString()))
       log.debug(s"Consul catalog lookup at hosts:$hosts path:$path addresses: $as")
-      as
+      as.map(Address(_))
     }
 
     Await.result(f)
