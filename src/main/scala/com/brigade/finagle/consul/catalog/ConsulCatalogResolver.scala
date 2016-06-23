@@ -1,15 +1,16 @@
 package com.brigade.finagle.consul.catalog
 
+import java.net.InetSocketAddress
+import java.util.concurrent.TimeUnit
+
 import com.brigade.finagle.consul.{ConsulHttpClientFactory, ConsulQuery}
-import com.twitter.finagle.http.{Method, RequestBuilder, Request}
+import com.twitter.finagle.http.{Method, Request, Response}
 import com.twitter.finagle.util.DefaultTimer
-import com.twitter.finagle.{Address, Addr, Resolver}
+import com.twitter.finagle.{Addr, Address, Resolver}
 import com.twitter.logging.Logger
-import com.twitter.util.{Await, Var}
+import com.twitter.util._
 import org.json4s._
 import org.json4s.jackson.JsonMethods._
-
-import java.net.{SocketAddress, InetSocketAddress}
 
 /**
  * A finagle Resolver for services registered in the consul catalog
@@ -32,9 +33,9 @@ class ConsulCatalogResolver extends Resolver {
     q.tags.toList.map { "tag" -> _ }
   }
 
-  private def mkPath(q: ConsulQuery) = {
+  private def mkPath(q: ConsulQuery, idx: String) = {
     val path = s"/v1/health/service/${q.name}"
-    val params = List(datacenterParam(q), tagParams(q)).flatten :+ ("passing", "true")
+    val params = List(datacenterParam(q), tagParams(q)).flatten :+ ("passing", "true") :+ ("index", idx) :+ ("wait", "10s")
     val query = Request.queryString(params: _*)
     s"$path$query"
   }
@@ -45,29 +46,40 @@ class ConsulCatalogResolver extends Resolver {
       .map { ex => new InetSocketAddress(Option(ex.Service.Address).filterNot(_.isEmpty).getOrElse(ex.Node.Address), ex.Service.Port)}
   }
 
-  private def addresses(hosts: String, q: ConsulQuery) : Set[Address] = {
+
+  private def fetch(hosts: String, q: ConsulQuery, idx: String) : Future[Response] = {
     val client = ConsulHttpClientFactory.getClient(hosts)
-    val path = mkPath(q)
+    val path = mkPath(q, idx)
     val req = Request(Method.Get, path)
     req.host = "localhost"
 
-    val f = client(req).map { resp =>
-      val as = jsonToAddresses(parse(resp.getContentString()))
-      log.debug(s"Consul catalog lookup at hosts:$hosts path:$path addresses: $as")
-      as.map(Address(_))
-    }
+    log.debug(s"Executing GET $req")
 
-    Await.result(f)
+    client(req)
   }
 
   def addrOf(hosts: String, query: ConsulQuery): Var[Addr] = {
-    Var.async(Addr.Pending: Addr) { u =>
-      u() = Addr.Bound(addresses(hosts, query))
+    Var.async(Addr.Pending: Addr) { update =>
+      @volatile var running = true
 
-      timer.schedule(query.ttl) {
-        val addrs = addresses(hosts, query)
-        if (addrs.nonEmpty) u() = Addr.Bound(addresses(hosts, query))
+      def cycle(index: String): Future[Unit] = {
+        if (running) fetch(hosts, query, index) transform {
+          case Return(response) =>
+            val as = jsonToAddresses(parse(response.getContentString()))
+            update() = Addr.Bound(as.map(Address(_)))
+            val idx = response.headerMap.getOrElse("X-Consul-Index", "0")
+            cycle(idx)
+          case t: Throw[_] => timer.doLater(Duration(1, TimeUnit.SECONDS)) {
+            cycle("0")
+          }
+        } else Future.Done
       }
+      cycle("0")
+
+      Closable.make({_ =>
+        running = false
+        Future.Done
+      })
     }
   }
 

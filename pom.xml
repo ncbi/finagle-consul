@@ -4,13 +4,13 @@
 
     <groupId>com.brigade</groupId>
     <artifactId>finagle-consul</artifactId>
-    <version>0.0.2-SNAPSHOT</version>
+    <version>0.0.3-SNAPSHOT</version>
 
     <properties>
         <scala.version>2.11.7</scala.version>
         <scala.base.version>2.11</scala.base.version>
         <json4s.version>3.2.10</json4s.version>
-        <finagle.version>6.31.0</finagle.version>
+        <finagle.version>6.35.0</finagle.version>
     </properties>
 
     <dependencies>
