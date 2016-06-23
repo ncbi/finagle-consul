@@ -4,6 +4,7 @@ import java.net.InetSocketAddress
 import java.util.concurrent.TimeUnit
 
 import com.brigade.finagle.consul.{ConsulHttpClientFactory, ConsulQuery}
+
 import com.twitter.finagle.http.{Method, Request, Response}
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.finagle.{Addr, Address, Resolver}
@@ -58,43 +59,31 @@ class ConsulCatalogResolver extends Resolver {
     client(req)
   }
 
-  def addrOf(hosts: String, query: ConsulQuery): Var[Addr] = {
-    Var.async(Addr.Pending: Addr) { update =>
-      @volatile var running = true
+  def addrOf(hosts: String, query: ConsulQuery): Var[Addr] = Var.async(Addr.Pending: Addr) { update =>
+    @volatile var running = true
 
-      def cycle(index: String): Future[Unit] = {
-        if (running) fetch(hosts, query, index) transform {
-          case Return(response) =>
-            val as = jsonToAddresses(parse(response.getContentString()))
-            update() = Addr.Bound(as.map(Address(_)))
-            val idx = response.headerMap.getOrElse("X-Consul-Index", "0")
-            cycle(idx)
-          case t: Throw[_] => timer.doLater(Duration(1, TimeUnit.SECONDS)) {
-            cycle("0")
-          }
-        } else Future.Done
+    def cycle(index: String): Future[Unit] = if (running) fetch(hosts, query, index) transform {
+      case Return(response) =>
+        val as = jsonToAddresses(parse(response.getContentString()))
+        update() = Addr.Bound(as.map(Address(_)))
+        val idx = response.headerMap.getOrElse("X-Consul-Index", "0")
+        cycle(idx)
+      case t: Throw[_] => timer.doLater(Duration(1, TimeUnit.SECONDS)) {
+        cycle("0")
       }
-      cycle("0")
+    } else Future.Done
+    cycle("0")
 
-      Closable.make({_ =>
-        running = false
-        Future.Done
-      })
-    }
+    Closable make { _ => running = false; Future.Done }
   }
 
-  override def bind(arg: String): Var[Addr] = {
-    arg.split("!") match {
-      case Array(hosts, query) =>
-        ConsulQuery.decodeString(query.head + query.tail.split("/", 2).head) match {
-          case Some(q) => addrOf(hosts, q)
-          case None =>
-            throw new IllegalArgumentException(s"Invalid address '$arg'")
-        }
-
-      case _ =>
-        throw new IllegalArgumentException(s"Invalid address '$arg'")
-    }
+  override def bind(arg: String): Var[Addr] = arg.split("!") match {
+    case Array(hosts, query) =>
+      ConsulQuery.decodeString(query.head + query.tail.split("/", 2).head) match {
+        case Some(q) => addrOf(hosts, q)
+        case None => throw new IllegalArgumentException(s"Invalid address '$arg'")
+      }
+    case _ => throw new IllegalArgumentException(s"Invalid address '$arg'")
   }
 }
 

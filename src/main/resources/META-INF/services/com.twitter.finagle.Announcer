@@ -1,2 +1,1 @@
-com.brigade.finagle.consul.kv.ConsulKVAnnouncer
 com.brigade.finagle.consul.catalog.ConsulAgentCatalogAnnouncer

@@ -4,21 +4,14 @@ import com.brigade.finagle.consul.{ConsulQuery, ConsulHttpClientFactory}
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.finagle.{Announcement, Announcer}
 import com.twitter.logging.Logger
-import com.twitter.util.{Await, Duration, Future}
+import com.twitter.util.{FutureCancelledException, Await, Duration, Future}
 
 import java.net.InetSocketAddress
 
 import java.util.concurrent.TimeUnit
 
 /**
- * An !!!Experimental!!! announcer to register services in Consul's service catalog via a consul agent
- *
  * Note: a consul agent is required for health checks.
- *
- * WARNING: this announcer is severely limited by: https://github.com/hashicorp/consul/issues/679
- * Until the issue is resolved, service definitions are not ephemeral, so an external process is required
- * to clean them up.
- * This is not an issue if the server is shutdown cleanly (unannounce is called).
  *
  * @see [[https://consul.io/docs/agent/services.html]]
  */
@@ -29,6 +22,9 @@ class ConsulAgentCatalogAnnouncer extends Announcer {
   val maxHeartbeatFrequency = Duration(10, TimeUnit.SECONDS)
 
   def announce(ia: InetSocketAddress, hosts: String, q: ConsulQuery): Future[Announcement] = {
+    @volatile var running = true
+    @volatile var heartbeatFuture: Future[Unit] = Future.Done
+
     val consulClient = new ConsulAgentClient(ConsulHttpClientFactory.getClient(hosts))
     val registrationFuture = consulClient.register(ia, q)
 
@@ -36,42 +32,35 @@ class ConsulAgentCatalogAnnouncer extends Announcer {
       .map { regResponse =>
         log.debug(s"Successfully registered consul service: $regResponse")
 
-        consulClient.healthCheck(regResponse.checkId) // initial healthcheck
+        consulClient.sendHearbeat(regResponse.checkId) // initial heartbeat
 
-        // start the healthcheck and always make it less than the TTL
+        // start the hearbeats and always make it less than the TTL
         val freq = q.ttl / 2
-        require(freq.inSeconds >= 1, "Service TTL must be above two seconds!")
+        require(freq.inMilliseconds >= 10, "Service TTL must be above 10 ms!")
         val heartbeatFrequency = freq.min(maxHeartbeatFrequency)
         log.debug(s"Heartbeat frequency: $heartbeatFrequency")
         val heartbeatTask = timer.schedule(heartbeatFrequency) {
           log.trace("heartbeat")
-          Await.result(consulClient.healthCheck(regResponse.checkId))
+          heartbeatFuture = consulClient.sendHearbeat(regResponse.checkId)
         }
 
         new Announcement {
-          override def unannounce(): Future[Unit] = {
-            // sequence stopping the heartbeat and deleting the service registration
-            for {
-              _ <- heartbeatTask.close()
-              _ <- consulClient.deregisterService(regResponse.serviceId)
-            } yield {}
-        }
+          override def unannounce() = {
+            running = false
+            heartbeatTask.close()
+            heartbeatFuture.raise(new FutureCancelledException)
+            consulClient.deregisterService(regResponse.serviceId)
+          }
       }
     }
   }
 
-  override def announce(ia: InetSocketAddress, addr: String): Future[Announcement] = {
-    addr.split("!") match {
-      case Array(hosts, query) =>
-        ConsulQuery.decodeString(query) match {
-          case Some(q) => announce(ia, hosts, q)
-          case None =>
-            val exc = new IllegalArgumentException(s"Invalid addr '$addr'")
-            Future.exception(exc)
-        }
-      case _ =>
-        val exc = new IllegalArgumentException(s"Invalid addr '$addr'")
-        Future.exception(exc)
-    }
+  override def announce(ia: InetSocketAddress, addr: String): Future[Announcement] = addr.split("!") match {
+    case Array(hosts, query) =>
+      ConsulQuery.decodeString(query) match {
+        case Some(q) => announce(ia, hosts, q)
+        case None => Future.exception(new IllegalArgumentException(s"Invalid addr '$addr'"))
+      }
+    case _ => Future.exception(new IllegalArgumentException(s"Invalid addr '$addr'"))
   }
 }

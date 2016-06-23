@@ -5,10 +5,10 @@ import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpecLike}
 class ConsulQuerySpec extends WordSpecLike with Matchers with BeforeAndAfterAll {
 
   "parse values" in {
-    ConsulQuery.decodeString("/name?dc=DC&ttl=45&tag=prod&tag=trace") match {
+    ConsulQuery.decodeString("/name?dc=DC&ttl=100&tag=prod&tag=trace") match {
       case Some(ConsulQuery(name, ttl, tags, dc)) =>
         assert(name          == "name")
-        assert(ttl.toString  == "45.seconds")
+        assert(ttl.toString  == "100.milliseconds")
         assert(tags          == Set("prod", "trace"))
         assert(dc.contains("DC"))
     }
@@ -18,7 +18,7 @@ class ConsulQuerySpec extends WordSpecLike with Matchers with BeforeAndAfterAll 
     ConsulQuery.decodeString("") match {
       case Some(ConsulQuery(name, ttl, tags, dc)) =>
         assert(name          == "")
-        assert(ttl.toString  == "10.seconds")
+        assert(ttl.toString  == "200.milliseconds")
         assert(tags          == Set())
         assert(dc.isEmpty)
     }

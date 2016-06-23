@@ -1,2 +1,1 @@
-com.brigade.finagle.consul.kv.ConsulKVResolver
 com.brigade.finagle.consul.catalog.ConsulCatalogResolver

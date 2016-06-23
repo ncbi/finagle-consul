@@ -11,12 +11,5 @@ object ConsulHttpClientFactory {
 
   private val clients: mutable.Map[String, Client] = mutable.Map()
 
-  def getClient(hosts: String): Client = {
-    synchronized {
-      val client = clients.getOrElseUpdate(hosts, {
-        Http.newService(hosts)
-      })
-      client
-    }
-  }
+  def getClient(hosts: String): Client = synchronized { clients.getOrElseUpdate(hosts, { Http.newService(hosts) }) }
 }

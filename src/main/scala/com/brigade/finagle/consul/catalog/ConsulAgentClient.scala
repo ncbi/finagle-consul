@@ -61,7 +61,7 @@ class ConsulAgentClient(httpClient: Service[Request, Response]) {
         // fail the future
         throw new RuntimeException(s"Registration failed status=$status message=$msg")
       } else {
-        println(response.getContentString())
+        log.debug(response.getContentString())
         RegisterResponse(serviceId, checkId)
       }
     }
@@ -83,7 +83,7 @@ class ConsulAgentClient(httpClient: Service[Request, Response]) {
     }
   }
 
-  def healthCheck(checkId: String): Future[Unit] = {
+  def sendHearbeat(checkId: String): Future[Unit] = {
     // https://consul.io/docs/agent/http/agent.html#agent_check_pass
     val request = Request(Method.Get, healthCheckPath(checkId))
     request.host = "localhost"
