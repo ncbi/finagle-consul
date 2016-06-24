@@ -18,7 +18,7 @@ object ConsulQuery {
 
   def decodeString(query: String): Option[ConsulQuery] = {
     val q      = new QueryStringDecoder(query)
-    val name   = q.getPath.stripPrefix("/").split("/") mkString "."
+    val name   = q.getPath.stripPrefix("/").split("/") mkString "_"
     val params = q.getParameters.asScala
     val ttl    = params.get("ttl").map(readTTL).getOrElse(Duration.fromMilliseconds(100))
     val tags   = params.get("tag").map(_.asScala.toSet).getOrElse(Set.empty[String])
