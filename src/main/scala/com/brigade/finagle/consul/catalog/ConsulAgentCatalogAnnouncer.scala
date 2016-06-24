@@ -28,17 +28,18 @@ class ConsulAgentCatalogAnnouncer extends Announcer {
     val consulClient = new ConsulAgentClient(ConsulHttpClientFactory.getClient(hosts))
     val registrationFuture = consulClient.register(ia, q)
 
+    // start the hearbeats and always make it less than the TTL
+    val freq = q.ttl / 2
+    require(freq.inMilliseconds >= 10, "Service TTL must be above 10 ms!")
+    val heartbeatFrequency = freq.min(maxHeartbeatFrequency)
+    log.debug(s"Heartbeat frequency: $heartbeatFrequency")
+
     registrationFuture
       .map { regResponse =>
         log.debug(s"Successfully registered consul service: $regResponse")
 
         consulClient.sendHearbeat(regResponse.checkId) // initial heartbeat
 
-        // start the hearbeats and always make it less than the TTL
-        val freq = q.ttl / 2
-        require(freq.inMilliseconds >= 10, "Service TTL must be above 10 ms!")
-        val heartbeatFrequency = freq.min(maxHeartbeatFrequency)
-        log.debug(s"Heartbeat frequency: $heartbeatFrequency")
         val heartbeatTask = timer.schedule(heartbeatFrequency) {
           log.trace("heartbeat")
           heartbeatFuture = consulClient.sendHearbeat(regResponse.checkId)

@@ -27,7 +27,7 @@ class ConsulAgentClient(httpClient: Service[Request, Response]) {
 
   def deregisterPath(serviceId: String): String = s"/v1/agent/service/deregister/$serviceId"
 
-  def formatTtl(d: Duration): String = s"${d.inUnit(TimeUnit.SECONDS)}s"
+  def formatTtl(d: Duration): String = s"${d.inUnit(TimeUnit.MILLISECONDS)}ms"
 
   def register(ia: InetSocketAddress, q: ConsulQuery): Future[RegisterResponse] = {
     val address = ia.getAddress.getHostAddress
