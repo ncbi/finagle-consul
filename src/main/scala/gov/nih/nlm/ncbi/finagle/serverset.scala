@@ -1,14 +1,14 @@
-package com.brigade.finagle.consul
+package gov.nih.nlm.ncbi.finagle
 
-import com.twitter.finagle.{Addr, NameTree, Namer, Resolver, Path, Name}
-import com.twitter.util.{Var, Activity}
+import com.twitter.finagle._
+import com.twitter.util.{Activity, Var}
 
 /**
- * A namer for serverset paths of the form /consul-hosts/consul[KV]:path... where consul-hosts is
- * a consul connect string like 'consul.service.consul:8500'.  Naming is performed by way of a
- * Resolver.
- */
-private[consul] trait BaseServersetNamer extends Namer {
+  * A namer for serverset paths of the form /consul-hosts/consul[KV]:path... where consul-hosts is
+  * a consul connect string like 'consul.service.consul:8500'.  Naming is performed by way of a
+  * Resolver.
+  */
+private[finagle] trait BaseServersetNamer extends Namer {
 
   /** Resolve a resolver string to a Var[Addr]. */
   protected[this] def resolve(spec: String): Var[Addr] = Resolver.eval(spec) match {
@@ -42,6 +42,7 @@ private[consul] trait BaseServersetNamer extends Namer {
   }
 }
 
+
 /**
  * The serverset namer takes [[com.twitter.finagle.Path Paths]] of the form
  *
@@ -56,14 +57,14 @@ private[consul] trait BaseServersetNamer extends Namer {
  * Endpoint names are delimited by the ':' character. For example
  *
  * {{{
- * /$/com.brigade.finagle.consul.serverset/consul/consul.service.consul:8500/my-app:a=b
+ * /$/gov.nih.nlm.ncbi.finagle.consul.serverset/consul/consul.service.consul:8500/my-app:a=b
  * }}}
  *
  * is the endpoint `http` of serverset `/twitter/service/cuckoo/prod/read` on
  * the ensemble `sdzookeeper.local.twitter.com:2181`.
  */
 class serverset extends BaseServersetNamer {
-  private[this] val idPrefix = Path.Utf8("$", "com.brigade.finagle.consul.serverset")
+  private[this] val idPrefix = Path.Utf8("$", "gov.nih.nlm.ncbi.finagle.consul.serverset")
 
   protected[this] def bind(path: Path): Option[Name.Bound] = path match {
     case Path.Utf8(strategy, hosts, rest@_*) =>

@@ -1,1 +1,1 @@
-com.brigade.finagle.consul.catalog.ConsulAgentCatalogAnnouncer
+gov.nih.nlm.ncbi.finagle.consul.catalog.ConsulAgentCatalogAnnouncer

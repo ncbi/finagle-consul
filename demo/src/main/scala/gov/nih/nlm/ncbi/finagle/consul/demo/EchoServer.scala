@@ -1,13 +1,10 @@
-package com.brigade.finagle.consul.demo
+package gov.nih.nlm.ncbi.finagle.consul.demo
 
-import com.twitter.finagle.http.{Status, Request, Response}
-import com.twitter.finagle.{Service, Http}
-import com.twitter.logging.{Level, Logger}
+import com.twitter.finagle.http.{Request, Response, Status}
+import com.twitter.finagle.{Http, Service}
 import com.twitter.util.{Await, Future}
 
-/**
- *
- */
+
 object EchoServer {
   def main(args: Array[String]): Unit = {
     val serverPort = args.headOption.getOrElse("8080")

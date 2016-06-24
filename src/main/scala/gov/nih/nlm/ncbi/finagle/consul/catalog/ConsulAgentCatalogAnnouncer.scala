@@ -1,14 +1,13 @@
-package com.brigade.finagle.consul.catalog
+package gov.nih.nlm.ncbi.finagle.consul.catalog
 
-import com.brigade.finagle.consul.{ConsulQuery, ConsulHttpClientFactory}
+import java.net.InetSocketAddress
+import java.util.concurrent.TimeUnit
+
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.finagle.{Announcement, Announcer}
 import com.twitter.logging.Logger
-import com.twitter.util.{FutureCancelledException, Await, Duration, Future}
-
-import java.net.InetSocketAddress
-
-import java.util.concurrent.TimeUnit
+import com.twitter.util.{Await, Duration, Future, FutureCancelledException}
+import gov.nih.nlm.ncbi.finagle.consul.{ConsulHttpClientFactory, ConsulQuery}
 
 /**
  * Note: a consul agent is required for health checks.
@@ -49,7 +48,7 @@ class ConsulAgentCatalogAnnouncer extends Announcer {
           override def unannounce() = {
             running = false
             heartbeatTask.close()
-            heartbeatFuture.raise(new FutureCancelledException)
+            Await.ready(heartbeatFuture)
             consulClient.deregisterService(regResponse.serviceId)
           }
       }

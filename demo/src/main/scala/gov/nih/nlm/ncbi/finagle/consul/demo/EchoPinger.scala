@@ -1,13 +1,10 @@
-package com.brigade.finagle.consul.demo
+package gov.nih.nlm.ncbi.finagle.consul.demo
 
 import com.twitter.finagle.Http
 import com.twitter.finagle.http.Request
-import com.twitter.logging.{Level, Logger}
 import com.twitter.util.Await
 
-/**
- *
- */
+
 object EchoPinger {
   def main(args: Array[String]): Unit = {
     val cli = Http.client.newService("consul!localhost:8500!/EchoServer?ttl=2")

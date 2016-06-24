@@ -1,15 +1,14 @@
-package com.brigade.finagle.consul.catalog
+package gov.nih.nlm.ncbi.finagle.consul.catalog
 
 import java.net.InetSocketAddress
 import java.util.concurrent.TimeUnit
-
-import com.brigade.finagle.consul.{ConsulHttpClientFactory, ConsulQuery}
 
 import com.twitter.finagle.http.{Method, Request, Response}
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.finagle.{Addr, Address, Resolver}
 import com.twitter.logging.Logger
 import com.twitter.util._
+import gov.nih.nlm.ncbi.finagle.consul.{ConsulHttpClientFactory, ConsulQuery}
 import org.json4s._
 import org.json4s.jackson.JsonMethods._
 

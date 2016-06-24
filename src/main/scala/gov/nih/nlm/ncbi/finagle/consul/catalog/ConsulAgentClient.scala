@@ -1,10 +1,10 @@
-package com.brigade.finagle.consul.catalog
+package gov.nih.nlm.ncbi.finagle.consul.catalog
 
-import com.brigade.finagle.consul.ConsulQuery
 import com.twitter.finagle.Service
 import com.twitter.finagle.http.{Method, Request, Response}
 import com.twitter.logging.Logger
 import com.twitter.util.{Duration, Future}
+import gov.nih.nlm.ncbi.finagle.consul.ConsulQuery
 import org.json4s.DefaultFormats
 import org.json4s.jackson.Serialization
 

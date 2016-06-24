@@ -1,4 +1,4 @@
-package com.brigade.finagle.consul
+package gov.nih.nlm.ncbi.finagle.consul
 
 import com.twitter.util.Duration
 import org.jboss.netty.handler.codec.http.QueryStringDecoder
@@ -20,7 +20,7 @@ object ConsulQuery {
     val q      = new QueryStringDecoder(query)
     val name   = q.getPath.stripPrefix("/").split("/") mkString "_"
     val params = q.getParameters.asScala
-    val ttl    = params.get("ttl").map(readTTL).getOrElse(Duration.fromMilliseconds(100))
+    val ttl    = params.get("ttl").map(readTTL).getOrElse(Duration.fromMilliseconds(200))
     val tags   = params.get("tag").map(_.asScala.toSet).getOrElse(Set.empty[String])
     val dc     = params.get("dc").map(_.get(0))
     Some(ConsulQuery(name, ttl, tags, dc))

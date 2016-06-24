@@ -1,4 +1,4 @@
-package com.brigade.finagle.consul.catalog
+package gov.nih.nlm.ncbi.finagle.consul.catalog
 
 sealed trait ConsulCheck
 

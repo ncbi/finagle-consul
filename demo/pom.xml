@@ -9,7 +9,7 @@
     <properties>
         <scala.version>2.11.7</scala.version>
         <scala.base.version>2.11</scala.base.version>
-        <finagle.version>6.31.0</finagle.version>
+        <finagle.version>6.35.0</finagle.version>
     </properties>
 
     <dependencies>

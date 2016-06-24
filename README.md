@@ -58,50 +58,13 @@ This is an issue with [Consul itself](https://github.com/hashicorp/consul/issues
 that can be mitigated with a cron job.
 
 
-#### K/V strategy
-
-Usage (a Consul Agent is never required):
-
-```
-consulKV!host1:port1,host2:port2,...!/serviceName
-```
-
-For Example:
-
-```scala
-val server = Http.serveAndAnnounce("consulKV!127.0.0.1:8500!/RandomNumber")
-val client = Http.newService("consulKV!127.0.0.1:8500!/RandomNumber")
-```
-
-Pros:
-* Services are completely removed from Consul when they fail their TTL check
-* Doesn't require a Consul Agent to announce services
-
-Cons:
-* TTLs can't be under 10s (a limitation of Consul sessions)
-* Doesn't integrate with native Consul Services
-
-The K/V strategy replicates Zookeeper-like service discovery using ephemeral
-key value pairs. If Consul is only being used for service discovery between
-finagle services, this is the way to go.
-
-Unlike the catalog, Consul services and sessions support TTLs for keys, so, when
-an application killed by OOM killer or closed unexpectedly, the session and
-keys associated with it are automatically removed after the TTL expires.
-
-The major drawback of this approach is that non-Finagle services will not be
-able to discover or be discovered by this mechanism without custom integration.
-
-Service definitions are stored in `/v1/kv/finagle/services/:name/:sessionId`,
-you can specify a name as URL, but all "/" will be replaced with "."
-
 
 ### Example
 
 #### Server
 
 ```
-val server = Http.server.serveAndAnnounce("consul!localhost:8500!/EchoServer?ttl=5", s":$serverPort", service)
+val server = Http.server.serveAndAnnounce("consul!localhost:8500!/EchoServer?ttl=100", s":$serverPort", service)
 
 // Ensure clean de-registration 
 sys.addShutdownHook {
@@ -113,12 +76,12 @@ Await.ready(server)
 #### Client
 
 ```
-val client = Http.client.newService("consul!localhost:8500!/EchoServer?ttl=2")
+val client = Http.client.newService("consul!localhost:8500!/EchoServer")
 
 ```
 
 #### D-Tab
 
 ```
-Dentry.read("/account=>/$/com.brigade.finagle.consul.serverset/consul/consul.service.aws-prod.consul:80/account-version-2-2-build-73")))
+Dentry.read("/account=>/$/gov.nih.nlm.ncbi.finagle.serverset/consul/consul.service.aws-prod.consul:80/account-version-2-2-build-73")))
 ```
