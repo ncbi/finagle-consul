@@ -2,7 +2,7 @@
 
 Service discovery for Finagle cluster with Consul. This project was originally
 developed by
-[kachayev/finagle-consul](https://github.com/kachayev/finagle-consul) and [dmexe/finagle-consul](https://github.com/dmexe/finagle-consul)
+[kachayev/finagle-consul](https://github.com/kachayev/finagle-consul), [dmexe/finagle-consul](https://github.com/dmexe/finagle-consul) and [matteobanerjee/finagle-consul](https://github.com/matteobanerjee/finagle-consul)
 
 ### About
 [Consul](https://www.consul.io/) is a distributed, highly available and
@@ -66,7 +66,7 @@ that can be mitigated with a cron job.
 ```
 val server = Http.server.serveAndAnnounce("consul!localhost:8500!/EchoServer?ttl=100", s":$serverPort", service)
 
-// Ensure clean de-registration 
+// Ensure clean de-registration
 sys.addShutdownHook {
   Await.result(server.close())
 }
