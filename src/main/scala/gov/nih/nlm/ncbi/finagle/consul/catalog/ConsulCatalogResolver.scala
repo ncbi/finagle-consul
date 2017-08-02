@@ -2,8 +2,8 @@ package gov.nih.nlm.ncbi.finagle.consul.catalog
 
 import java.net.InetSocketAddress
 import java.util.concurrent.TimeUnit
-
 import com.twitter.finagle.http.{Method, Request, Response}
+import com.twitter.finagle.stats.ClientStatsReceiver
 import com.twitter.finagle.util.DefaultTimer
 import com.twitter.finagle.{Addr, Address, Resolver}
 import com.twitter.logging.Logger
@@ -22,6 +22,7 @@ class ConsulCatalogResolver extends Resolver {
   private val log = Logger.get(getClass)
   private val timer = DefaultTimer.twitter
   implicit val format = org.json4s.DefaultFormats
+  private val consulIndexStat = ClientStatsReceiver.scope("consul-catalog-resolver").stat("consul-index")
 
   private def datacenterParam(q: ConsulQuery): List[(String, String)] = {
     q.dc
@@ -66,8 +67,13 @@ class ConsulCatalogResolver extends Resolver {
         val as = jsonToAddresses(parse(response.getContentString()))
         update() = Addr.Bound(as.map(Address(_)))
         val idx = response.headerMap.getOrElse("X-Consul-Index", "0")
+
+        Try(idx.toFloat).foreach(consulIndexStat.add)
+
         cycle(idx)
-      case t: Throw[_] => timer.doLater(Duration(1, TimeUnit.SECONDS)) {
+      case Throw(t) => timer.doLater(Duration(1, TimeUnit.SECONDS)) {
+        log.warning(t, s"Exception throw while querying Consul for service discovery")
+
         cycle("0")
       }
     } else Future.Done
@@ -78,7 +84,7 @@ class ConsulCatalogResolver extends Resolver {
 
   override def bind(arg: String): Var[Addr] = arg.split("!") match {
     case Array(hosts, query) =>
-      ConsulQuery.decodeString(query.head + query.tail.split("/", 2).head) match {
+      ConsulQuery.decodeString(query) match {
         case Some(q) => addrOf(hosts, q)
         case None => throw new IllegalArgumentException(s"Invalid address '$arg'")
       }
