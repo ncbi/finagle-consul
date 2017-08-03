@@ -22,7 +22,14 @@ class ConsulCatalogResolver extends Resolver {
   private val log = Logger.get(getClass)
   private val timer = DefaultTimer.twitter
   implicit val format = org.json4s.DefaultFormats
-  private val consulIndexStat = ClientStatsReceiver.scope("consul-catalog-resolver").stat("consul-index")
+
+  @volatile
+  private var consulIndex: Float = 0
+
+  // not used by the code, but has to be referenced here so that the gauge doesn't get garbage collected
+  private val consulIndexGauge = ClientStatsReceiver
+    .scope("consul_catalog_resolver")
+    .addGauge("consul_index")(consulIndex)
 
   private def datacenterParam(q: ConsulQuery): List[(String, String)] = {
     q.dc
@@ -68,7 +75,7 @@ class ConsulCatalogResolver extends Resolver {
         update() = Addr.Bound(as.map(Address(_)))
         val idx = response.headerMap.getOrElse("X-Consul-Index", "0")
 
-        Try(idx.toFloat).foreach(consulIndexStat.add)
+        Try(idx.toFloat).foreach(index => consulIndex = index)
 
         cycle(idx)
       case Throw(t) => timer.doLater(Duration(1, TimeUnit.SECONDS)) {
