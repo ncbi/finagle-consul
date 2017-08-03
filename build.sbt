@@ -6,6 +6,8 @@ version := "0.1.2"
 
 scalaVersion := "2.11.8"
 
+licenses += ("Apache-2.0", url("http://www.apache.org/licenses/"))
+
 val finagleVersion = "6.44.0"
 
 libraryDependencies ++= Seq(
