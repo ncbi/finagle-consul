@@ -2,7 +2,7 @@
 
 Service discovery for Finagle cluster with Consul. This project was originally
 developed by
-[kachayev/finagle-consul](https://github.com/kachayev/finagle-consul), [dmexe/finagle-consul](https://github.com/dmexe/finagle-consul) and [matteobanerjee/finagle-consul](https://github.com/matteobanerjee/finagle-consul)
+[kachayev/finagle-consul](https://github.com/kachayev/finagle-consul), [dmexe/finagle-consul](https://github.com/dmexe/finagle-consul), [matteobanerjee/finagle-consul](https://github.com/matteobanerjee/finagle-consul) and [ncbi/finagle-consul](https://github.com/ncbi/finagle-consul). 
 
 ### About
 [Consul](https://www.consul.io/) is a distributed, highly available and
