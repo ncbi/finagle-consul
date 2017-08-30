@@ -82,6 +82,9 @@ class ConsulCatalogResolver extends Resolver {
         fetch(hosts, query, index) transform {
           case Return(response) =>
             val as = jsonToAddresses(parse(response.getContentString()))
+
+            log.debug(s"Fetched for [$hosts] with [${mkPath(query, index)}]: [${as.mkString(", ")}]")
+
             update() = Addr.Bound(as.map(Address(_)))
             val idx = response.headerMap.getOrElse("X-Consul-Index", "0")
 
