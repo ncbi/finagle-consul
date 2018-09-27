@@ -11,6 +11,7 @@ import com.twitter.util._
 import gov.nih.nlm.ncbi.finagle.consul.{ConsulHttpClientFactory, ConsulQuery}
 import org.json4s._
 import org.json4s.jackson.JsonMethods._
+import com.twitter.finagle.addr.WeightedAddress
 
 /**
  * A finagle Resolver for services registered in the consul catalog
@@ -40,10 +41,17 @@ class ConsulCatalogResolver extends Resolver {
     s"$path$query"
   }
 
-  private def jsonToAddresses(json: JValue): Set[InetSocketAddress] = {
+  private def jsonToAddresses(json: JValue): Set[(InetSocketAddress, Double)] = {
     json
       .extract[Set[HealthJson]]
-      .map { ex => new InetSocketAddress(Option(ex.Service.Address).filterNot(_.isEmpty).getOrElse(ex.Node.Address), ex.Service.Port)}
+      .map { ex => {
+          val weight = ex.Service.Weights match {
+            case Some(w) => if (!ex.Checks.exists(c => c.Status != ConsulCatalogResolver.StatusPassing)) w.Passing else w.Warning
+            case None => 1
+          }
+          (new InetSocketAddress(Option(ex.Service.Address).filterNot(_.isEmpty).getOrElse(ex.Node.Address), ex.Service.Port), weight)
+        }
+      }
   }
 
 
@@ -64,7 +72,7 @@ class ConsulCatalogResolver extends Resolver {
     def cycle(index: String): Future[Unit] = if (running) fetch(hosts, query, index) transform {
       case Return(response) =>
         val as = jsonToAddresses(parse(response.getContentString()))
-        update() = Addr.Bound(as.map(Address(_)))
+        update() = Addr.Bound(as.map(a => WeightedAddress(Address(a._1), a._2)))
         val idx = response.headerMap.getOrElse("X-Consul-Index", "0")
         cycle(idx)
       case t: Throw[_] => timer.doLater(Duration(1, TimeUnit.SECONDS)) {
@@ -87,20 +95,36 @@ class ConsulCatalogResolver extends Resolver {
 }
 
 object ConsulCatalogResolver {
+  val StatusPassing = "passing"
+
   // These case classes are used to match the "Service" objects in the docs below
   // The consul json API is not consistent, so we can't just reuse other "Service" case classes:
   // https://www.consul.io/docs/agent/http/health.html#health_service
-  case class HealthJson(Node: NodeHealthJson, Service: ServiceHealthJson)
+  case class HealthJson(
+    Node: NodeHealthJson,
+    Service: ServiceHealthJson,
+    Checks: List[CheckJson]
+  )
 
   case class ServiceHealthJson(
     ID: Option[String],
     Service: String,
     Address: String,
     Tags: Option[Seq[String]],
-    Port: Int
+    Port: Int,
+    Weights: Option[ServiceWeightsJson]
   )
 
   case class NodeHealthJson(
     Address: String
+  )
+
+  case class CheckJson(
+    Status: String
+  )
+
+  case class ServiceWeightsJson(
+    Passing: Int,
+    Warning: Int
   )
 }
